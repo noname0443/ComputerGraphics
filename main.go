@@ -24,8 +24,11 @@ func (g *Game) Draw(screen *ebiten.Image) {
 
 	ellipse := ebiten.NewImage(screenWidth, screenHeight)
 	DrawEllipse(100, 50, screenWidth/2, screenHeight/2, 90, ellipse)
+	borders := GetBorder(ellipse)
+	log.Println(len(borders))
 
 	screen.DrawImage(ellipse, nil)
+	DrawPixels(borders, screen)
 }
 
 func (g *Game) Layout(outsideWidth, outsideHeight int) (int, int) {
