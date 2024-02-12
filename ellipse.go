@@ -18,7 +18,11 @@ type Ellipse struct {
 }
 
 func NewEllipse(width, height int, clr color.Color) *Ellipse {
-	img := ebiten.NewImage(width, height)
+	m := width
+	if height > m {
+		m = height
+	}
+	img := ebiten.NewImage(m, m)
 
 	width /= 2
 	height /= 2
@@ -48,18 +52,24 @@ func RotatePixel(point Point, degree int) Point {
 }
 
 func (el *Ellipse) Move(x, y int, destination *ebiten.Image) {
-	x, y = x-el.width, y-el.height
+	x, y = x-el.image.Bounds().Dx()/2, y-el.image.Bounds().Dy()/2
 
-	for i := 0; i < el.image.Bounds().Dx(); i++ {
-		for j := 0; j < el.image.Bounds().Dy(); j++ {
-			if (el.image.At(i, j) != color.RGBA{}) {
-				destination.Set(i+x, y+j, el.image.At(i, j))
+	img := el.Rotate()
+	for i := 0; i < img.Bounds().Dx(); i++ {
+		for j := 0; j < img.Bounds().Dy(); j++ {
+			if (img.At(i, j) != color.RGBA{}) {
+				destination.Set(i+x, y+j, img.At(i, j))
 			}
 		}
 	}
 
 	if el.attchedEllipse != nil {
 		point := el.border[el.iteratorMove]
+
+		point = Point{point.x - el.width, point.y - el.height}
+		point = RotatePixel(point, el.iteratorRotate)
+		point = Point{point.x + img.Bounds().Dx()/2, point.y + img.Bounds().Dy()/2}
+
 		el.attchedEllipse.Move(x+point.x, y+point.y, destination)
 	}
 }
@@ -73,6 +83,7 @@ func (el *Ellipse) IterateRotate(speed int) {
 }
 
 func (el *Ellipse) Attach(ellipse *Ellipse) {
+	el.EvaluateBorder()
 	el.attchedEllipse = ellipse
 }
 
@@ -88,8 +99,8 @@ func (el *Ellipse) Rotate() *ebiten.Image {
 	for i := 0; i < el.image.Bounds().Dx(); i++ {
 		for j := 0; j < el.image.Bounds().Dy(); j++ {
 			if (el.image.At(i, j) != color.RGBA{}) {
-				x := float64(i - el.image.Bounds().Dx()/2)
-				y := float64(j - el.image.Bounds().Dy()/2)
+				x := float64(i - el.width)
+				y := float64(j - el.height)
 
 				I := int(x*math.Cos(rad)+y*-math.Sin(rad)) + newImg.Bounds().Dx()/2
 				J := int(x*math.Sin(rad)+y*math.Cos(rad)) + newImg.Bounds().Dy()/2
