@@ -64,7 +64,7 @@ func (el *Ellipse) Move(x, y int, destination *ebiten.Image) {
 	}
 
 	if el.attchedEllipse != nil {
-		point := el.border[el.iteratorMove]
+		point := el.border[el.iteratorMove%len(el.border)]
 
 		point = Point{point.x - el.width, point.y - el.height}
 		point = RotatePixel(point, el.iteratorRotate)
@@ -75,7 +75,7 @@ func (el *Ellipse) Move(x, y int, destination *ebiten.Image) {
 }
 
 func (el *Ellipse) IterateMove(speed int) {
-	el.iteratorMove = (el.iteratorMove + speed) % len(el.border)
+	el.iteratorMove = mod(el.iteratorMove+speed, len(el.border))
 }
 
 func (el *Ellipse) IterateRotate(speed int) {

@@ -5,29 +5,44 @@ import (
 	_ "image/jpeg"
 	"log"
 
+	"github.com/ebitenui/ebitenui"
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
 type Game struct {
 	ellipses []*Ellipse
+	ui       *ebitenui.UI
+
+	MovementSpeed []int
+	RotateSpeed   []int
 }
 
 func NewGame() *Game {
-	return &Game{}
+	move := make([]int, 5)
+	rotate := make([]int, 5)
+
+	return &Game{
+		ui: &ebitenui.UI{
+			Container: initUI(UIData{move, rotate}),
+		},
+		MovementSpeed: move,
+		RotateSpeed:   rotate,
+	}
 }
 
 func (g *Game) Update() error {
+	g.ui.Update()
 	return nil
 }
 
-var i int
-
 func (g *Game) Draw(screen *ebiten.Image) {
+	g.ui.Draw(screen)
+
 	if len(g.ellipses) == 0 {
-		ellipse := NewEllipse(400, 200, color.RGBA{0, 0, 255, 255})
-		ellipse2 := NewEllipse(200, 100, color.RGBA{255, 0, 0, 255})
+		ellipse := NewEllipse(400, 200, color.RGBA{0, 0, 0, 255})
+		ellipse2 := NewEllipse(200, 100, color.RGBA{0, 0, 255, 255})
 		ellipse3 := NewEllipse(100, 50, color.RGBA{0, 255, 0, 255})
-		ellipse4 := NewEllipse(50, 25, color.RGBA{255, 255, 255, 255})
+		ellipse4 := NewEllipse(50, 25, color.RGBA{255, 0, 0, 255})
 		ellipse5 := NewEllipse(25, 12, color.RGBA{255, 0, 255, 255})
 
 		ellipse.Attach(ellipse2)
@@ -39,17 +54,14 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	}
 
 	screenWidth, screenHeight := ebiten.WindowSize()
-	g.ellipses[0].Move(screenWidth/2, screenHeight/2, screen)
-	g.ellipses[0].IterateMove(3)
-	g.ellipses[1].IterateMove(6)
-	g.ellipses[2].IterateMove(9)
-	g.ellipses[3].IterateMove(12)
+	g.ellipses[0].Move(screenWidth*3/4, screenHeight/2, screen)
 
-	g.ellipses[0].IterateRotate(3)
-	g.ellipses[1].IterateRotate(6)
-	g.ellipses[2].IterateRotate(9)
-	g.ellipses[3].IterateRotate(12)
-	g.ellipses[4].IterateRotate(15)
+	for i := 0; i < 5; i++ {
+		if i != 4 {
+			g.ellipses[i].IterateMove(g.MovementSpeed[i])
+		}
+		g.ellipses[i].IterateRotate(g.RotateSpeed[i])
+	}
 }
 
 func (g *Game) Layout(outsideWidth, outsideHeight int) (int, int) {
