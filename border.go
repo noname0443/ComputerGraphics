@@ -18,8 +18,8 @@ type Point struct {
 	y int
 }
 
-func GetBorder(img *ebiten.Image) [][]int {
-	border := [][]int{}
+func GetBorder(img *ebiten.Image) []Point {
+	border := []Point{}
 	borderMap := map[Point]bool{}
 
 	startX, startY := -1, -1
@@ -36,7 +36,7 @@ func GetBorder(img *ebiten.Image) [][]int {
 			break
 		}
 	}
-	border = append(border, []int{startX, startY})
+	border = append(border, Point{startX, startY})
 	black := Point{startX, startY}
 
 	isValidBlackPixel := func(x, y int) bool {
@@ -73,7 +73,7 @@ func GetBorder(img *ebiten.Image) [][]int {
 
 			if isWhitePixel(black.x+xPrev, black.y+yPrev) && isValidBlackPixel(black.x+x, black.y+y) {
 				flag = true
-				border = append(border, []int{black.x, black.y})
+				border = append(border, Point{black.x, black.y})
 				borderMap[black] = true
 				black = Point{black.x + x, black.y + y}
 			}
@@ -83,8 +83,8 @@ func GetBorder(img *ebiten.Image) [][]int {
 	return border
 }
 
-func DrawPixels(pixels [][]int, screen *ebiten.Image) {
+func DrawPixels(pixels []Point, screen *ebiten.Image) {
 	for _, v := range pixels {
-		screen.Set(v[0], v[1], color.RGBA{255, 0, 0, 255})
+		screen.Set(v.x, v.y, color.RGBA{255, 0, 0, 255})
 	}
 }
